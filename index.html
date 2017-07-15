@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      background: #fff;
+    }
+    #kitten,
+    .container {
+      position: absolute;
+      top: 75%;
+      left: 50%;
+      transform: translateX(-50%)
+    }
+
+    #kitten{
+      top: 8%;
+    }
+
+    .container textarea {
+      width: 390px;
+      height: 100px;
+      resize: none;
+      outline: none;
+      border: 1px solid #ccc;
+    }
+
+    #btn {
+      display: inline-block;
+      padding: 10px 20px;
+      color: #fff;
+      border: 1 solid #000;
+      background-color: limegreen;
+    }
+
+    #btn:hover {
+      background-color: lime;
+    }
+
+    #result {
+      height: 50px;
+      width: 400px;
+      margin: 0 auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      box-shadow: 0 0 10px 0 #bbb;
+      margin-bottom: 30px;
+      font-size: 14px;
+      line-height: 25px;
+      background-color: #eee;
+    }
+  </style>
+</head>
+
+<body>
+  <h1 align="center"> Kitty Talk!</h1>
+  <img id="kitten" src="kitten.jpg">
+  <div class="container">
+      <div id="result"></div>
+      
+    <label>
+      <span>Voice</span>
+      <select id="voiceOptions"></select>
+    </label>
+    <div id="btn">Test Voice</div>
+  </div>
+
+  <script>
+    window.onload = function () {
+
+  /////////////////////////////////////////////////////////////////////
+  ////////////////////////// DEV KITTEN ///////////////////////////////
+  /////////////////////////////////////////////////////////////////////
+
+
+      var voiceOptions = document.getElementById('voiceOptions');
+      var result       = document.getElementById('result');
+      var btn          = document.getElementById('btn');
+      var voiceMap     = [];
+
+      function init() {
+        checkCompatibilty() ? listening() : console.log('Your browser is not supported. If google chrome, please upgrade!');
+      }
+
+
+//SPEECH CHECK ---------------------------------------------------------------------------
+
+      function checkCompatibilty() {
+        if (!('speechSynthesis' in window)) { return false }
+        else if (!'webkitSpeechRecognition' in window) { return false }
+        else { return true }
+      };
+
+//MSGBOX ---------------------------------------------------------------------------
+
+      function logOut(str) {
+          result.innerHTML = str
+      }
+
+      function processer(arr){
+          var baz =  arr[0] +arr[1]
+          var str = arr[0] + '<span style="color:#999">"' + arr[1] + '</span>'
+          var stall = '<span style="color:#999">thinking...</span>'
+          logOut(stall)
+          setTimeout(function(){ logOut(str) }, 1000);
+          speak('meow,'+ baz)
+      }
+
+//SPEECHSYNTHESIS ---------------------------------------------------------------------------
+
+      function loadVoices() {
+        speechSynthesis.getVoices().map(x => {
+          var option = document.createElement('option');
+          option.value = x.name;
+          option.innerHTML = x.name;
+          voiceOptions.appendChild(option)
+          voiceMap[x.name] = x;
+        })
+      };
+
+      function speak(str) {
+        var msg    = new SpeechSynthesisUtterance();
+        msg.voice  = voiceMap['Google UK English Female']//voiceMap[voiceOptions.value];
+        msg.volume = 1;  //max 1 .1 steps
+        msg.rate   = 1;  //max 1 .1 steps
+        msg.pitch  = 2;  //max 2 .1 steps
+        msg.text   = str;
+
+        window.speechSynthesis.speak(msg);
+      };
+
+//SPEECHRECOGNITION ---------------------------------------------------------------------------
+
+      function listening() {
+         result.innerHTML ='<span style="color:#999">listening...</span>'
+        var rec = new webkitSpeechRecognition();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = 'en-CA';
+        rec.start()
+        rec.onresult = hear
+        rec.onerror = function (e) { console.log('an error occured') }
+      }
+
+      function hear(e) {
+
+        var finalTranscripts = '';
+        var intermTranscripts = '';
+
+        for (var i = e.resultIndex; i < e.results.length; i++) {
+            var transcript = e.results[i][0].transcript
+                transcript.replace('\n', '<br>')
+
+          e.results[i].isFinal 
+          ? finalTranscripts += transcript 
+          : intermTranscripts += transcript
+          if (e.results[i].isFinal) { processer([finalTranscripts, intermTranscripts])}
+          
+        }
+      };
+
+//EVENT LISTENERS ---------------------------------------------------------------------------
+
+      window.speechSynthesis.onvoiceschanged = function (e) {
+        loadVoices();
+      };
+      btn.addEventListener('click',function(e){
+        speak('The Fitness Gram PACER Test is a multi blah blah blah')
+      })
+      init()
+    }
+  </script>
+</body>
+
+</html>
